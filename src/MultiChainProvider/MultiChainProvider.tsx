@@ -32,7 +32,7 @@ export const useMultiChain = () => {
 };
 
 export const MultiChainProvider: React.FC<{ children: ReactElement }> = ({ children }) => {
-  const address = "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB" as `0x${string}`;
+  const address = "0x4aF5ee29551527BB3f4714561ae06F400a0139Ca" as `0x${string}`;
 
   const onChainProvider = useMemo(
     () => {
