@@ -42,7 +42,7 @@ export const AntProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [balance, setBalance] = useState<string>('0');
   const [activeAnts, setActiveAnts] = useState<number[]>([]);
   const [grid, setGrid] = useState<number[][]>(Array(64).fill(Array(64).fill(0)));
-  const [userAnts, setUserAnts] = useState<number[]>([]);
+//   const [userAnts, setUserAnts] = useState<number[]>([]);
   const [ants, setAnts] = useState<{ [key: number]: Ant }>({});
 
   // Read contract data
@@ -67,7 +67,7 @@ export const AntProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ...spartanContract,
     functionName: 'getGridState',
     query: {
-      refetchInterval: 100,
+      refetchInterval: 1000,
     },
   });
   console.log("data",gridData);
@@ -109,6 +109,7 @@ export const AntProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await writeContractAsync({
         ...spartanContract,
         functionName: 'createAnt',
+        address: spartanContract.address as `0x${string}`,
         args: [name, parseUnits(tokensToStake, 18)],
       });
     } catch (error) {
@@ -123,14 +124,17 @@ export const AntProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       await writeContractAsync({
         ...spartanContract,
+        address: spartanContract.address as `0x${string}`,
         functionName: 'withdrawAnt',
-        args: [antId],
+        args: [BigInt(antId)],
       });
     } catch (error) {
       console.error('Error withdrawing ant:', error);
       throw error;
     }
   };
+
+  const userAnts = Object.keys(ants).map(Number);
 
   const contextValue = {
     balance,
@@ -141,7 +145,7 @@ export const AntProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     createAnt,
     withdrawAnt,
   };
-  console.log(grid);
+//   console.log(userAnts);
 
   return (
     <AntContext.Provider value={contextValue}>

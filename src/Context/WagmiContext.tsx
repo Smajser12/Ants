@@ -19,7 +19,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { createConfig, createStorage, http, WagmiProvider } from 'wagmi';
 
 // Custom imports
-import { localhost, base } from 'viem/chains';
+import { base } from 'viem/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
 
@@ -43,22 +43,22 @@ const connectors = connectorsForWallets([
   appName
 });
 
-// const config = createConfig({
-//   connectors,
-//   chains: [base],
-//   transports: {
-//     [base.id]: http()
-//   },
-//   storage: createStorage({ storage: window.localStorage })
-// });
-
-const configLocalhost = createConfig({
+const config = createConfig({
   connectors,
-  chains: [localhost],
+  chains: [base],
   transports: {
-    [localhost.id]: http()
+    [base.id]: http()
   },
+  storage: createStorage({ storage: window.localStorage })
 });
+
+// const configLocalhost = createConfig({
+//   connectors,
+//   chains: [localhost],
+//   transports: {
+//     [localhost.id]: http()
+//   },
+// });
 
 // Wagmi client
 
@@ -66,7 +66,7 @@ const queryClient = new QueryClient();
 
 export function WagmiContext({ children }: { children: ReactNode }) {
   return(
-      <WagmiProvider config={configLocalhost}>
+      <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider theme={darkTheme({borderRadius: 'small'})}>
             {children}

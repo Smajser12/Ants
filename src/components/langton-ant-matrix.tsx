@@ -1,11 +1,13 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PlusCircle, MinusCircle } from 'lucide-react'
 import { useAnt } from './context/antContext'
+// import { useAccount } from 'wagmi'
+import { formatUnits } from 'viem'
 
-const GRID_SIZE = 64 // Changed to match contract's grid size
+
 const NEON_COLORS = [
   '#FF00FF', // Neon Pink
   '#00FFFF', // Cyan
@@ -25,10 +27,11 @@ const getAntColor = (antId: number) => {
 }
 
 export function LangtonAntMatrix() {
-  const { grid, ants, activeAnts, balance, createAnt, withdrawAnt } = useAnt()
+  const { grid, ants, activeAnts, balance, userAnts, createAnt, withdrawAnt } = useAnt()
   const [antName, setAntName] = useState('')
   const [stakingAmount, setStakingAmount] = useState('100')
   const [isCreating, setIsCreating] = useState(false)
+  // const { address } = useAccount()
 
   const handleCreateAnt = async () => {
     if (!antName || !stakingAmount) return
@@ -66,7 +69,7 @@ export function LangtonAntMatrix() {
                 <div
                   key={`${x}-${y}`}
                   className="w-[10px] h-[10px] border border-green-900 flex items-center justify-center"
-                  style={{ backgroundColor: cell > 0 ? getAntColor(cell) : 'black' }}
+                  style={{backgroundColor: cell > 0 ? getAntColor(cell) : 'black' }}
                 >
                   {activeAnts.map(antId => {
                     const ant = ants[antId]
@@ -136,40 +139,127 @@ export function LangtonAntMatrix() {
           {isCreating ? 'Creating...' : 'Create Ant'}
         </Button>
 
-        <div className="space-y-4">
-          {activeAnts.map(antId => {
-            const ant = ants[antId]
-            if (!ant) return null
-            
-            return (
-              <div 
-                key={antId} 
-                className="p-4 border border-green-500 rounded"
-                style={{ borderColor: getAntColor(antId) }}
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <span style={{ color: getAntColor(antId) }}>Ant #{antId}</span>
-                  {ant.owner.toLowerCase() === address?.toLowerCase() && (
-                    <Button 
-                      onClick={() => handleWithdrawAnt(antId)} 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-red-500"
+        <div className="mt-6">
+          <div className="text-cyan-500 text-sm font-bold mb-2 border-b border-cyan-500 pb-1">
+            YOUR ACTIVE ANTS
+          </div>
+          <div className="space-y-3">
+            {userAnts
+              .map(antId => {
+                const ant = ants[antId];
+                if (!ant) return null;
+                return (
+                  <div 
+                    key={antId} 
+                    className="relative group"
+                  >
+                    <div 
+                      className="p-3 border rounded-md bg-black/50 backdrop-blur-sm transition-all duration-300 group-hover:translate-x-1 group-hover:translate-y-1"
+                      style={{ 
+                        borderColor: getAntColor(antId),
+                        boxShadow: `0 0 10px ${getAntColor(antId)}40`
+                      }}
                     >
-                      <MinusCircle />
-                      <span className="sr-only">Withdraw Ant #{antId}</span>
-                    </Button>
-                  )}
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <span 
+                            className="text-lg font-bold"
+                            style={{ color: getAntColor(antId) }}
+                          >
+                            A
+                          </span>
+                          <span className="text-xs text-green-400">
+                            {ant.name}
+                          </span>
+                        </div>
+                        <Button
+                          onClick={() => handleWithdrawAnt(antId)}
+                          variant="ghost"
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20"
+                        >
+                          <MinusCircle className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </div>
+                      <div className="mt-1 text-xs space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Moves:</span>
+                          <span className="text-cyan-400">{ant.movesLeft.toString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Staked:</span>
+                          <span className="text-cyan-400">
+                            {formatUnits(ant.stakedTokens, 18)} LANT
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div 
+                      className="absolute inset-0 border rounded-md -z-10 transition-colors"
+                      style={{ 
+                        borderColor: getAntColor(antId),
+                        backgroundColor: `${getAntColor(antId)}10`
+                      }}
+                    />
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <div className="text-purple-500 text-sm font-bold mb-2 border-b border-purple-500 pb-1">
+            ALL ACTIVE ANTS
+          </div>
+          <div className="space-y-3">
+            {activeAnts.map(antId => {
+              const ant = ants[antId];
+              if (!ant) return null;
+              
+              return (
+                <div 
+                  key={antId} 
+                  className="p-3 border rounded-md bg-black/50 backdrop-blur-sm"
+                  style={{ 
+                    borderColor: getAntColor(antId),
+                    boxShadow: `0 0 10px ${getAntColor(antId)}40`
+                  }}
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <span 
+                        className="text-lg font-bold"
+                        style={{ color: getAntColor(antId) }}
+                      >
+                        A
+                      </span>
+                      <span className="text-xs text-green-400">
+                        {ant.name}
+                      </span>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      #{antId}
+                    </span>
+                  </div>
+                  <div className="mt-1 text-xs space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Moves:</span>
+                      <span className="text-purple-400">{ant.movesLeft.toString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Staked:</span>
+                      <span className="text-purple-400">
+                        {formatUnits(ant.stakedTokens, 18)} LANT
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>Name: {ant.name}</div>
-                <div>Moves Left: {ant.movesLeft.toString()}</div>
-                <div>Staked: {formatUnits(ant.stakedTokens, 18)} LANT</div>
-              </div>
-            )
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
-      <style jsx>{`
+      <style>{`
         .ant-highlight {
           animation: pulse 1.5s infinite;
         }
