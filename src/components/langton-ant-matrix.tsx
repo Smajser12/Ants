@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PlusCircle, MinusCircle } from 'lucide-react'
 import { useAnt } from './context/antContext'
-// import { useAccount } from 'wagmi'
 import { formatUnits } from 'viem'
+import { useAccount } from 'wagmi'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
 
 
 const NEON_COLORS = [
@@ -31,7 +32,7 @@ export function LangtonAntMatrix() {
   const [antName, setAntName] = useState('')
   const [stakingAmount, setStakingAmount] = useState('100')
   const [isCreating, setIsCreating] = useState(false)
-  // const { address } = useAccount()
+  const { isConnected } = useAccount()
 
   const handleCreateAnt = async () => {
     if (!antName || !stakingAmount) return
@@ -61,6 +62,22 @@ export function LangtonAntMatrix() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-b from-black to-green-900 text-green-500 font-mono">
+      {!isConnected && (
+        <div className="absolute top-4 left-4">
+          <div className="bg-black bg-opacity-50 p-1 rounded-lg border border-green-500">
+            <ConnectButton.Custom>
+              {({ openConnectModal }) => (
+                <button
+                  onClick={openConnectModal}
+                  className="px-3 py-1 bg-green-500 text-black text-sm font-bold rounded-lg hover:bg-green-600 transition-colors duration-200 shadow-lg"
+                >
+                  Connect
+                </button>
+              )}
+            </ConnectButton.Custom>
+          </div>
+        </div>
+      )}
       <div className="flex-grow p-4 flex items-center justify-center">
         <div className="relative border border-green-500 inline-block">
           {grid.map((row, y) => (
